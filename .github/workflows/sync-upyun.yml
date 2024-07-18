@@ -20,10 +20,12 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v3
         with:
-          go-version: '1.18'
+          go-version: '1.22.5'
 
       - name: Install UPX
-        run: go get -u github.com/upyun/upx/cmd/upx@master
+        run: |
+          go install github.com/upyun/upx/cmd/upx@latest
+          echo "${HOME}/go/bin" >> $GITHUB_PATH
 
       - name: Sync files to UPYUN
         env:
@@ -31,5 +33,5 @@ jobs:
           UPYUN_OPERATOR: ${{ secrets.UPYUN_OPERATOR }}
           UPYUN_PASSWORD: ${{ secrets.UPYUN_PASSWORD }}
         run: |
-          upx login $UPYUN_BUCKET $UPYUN_OPERATOR $UPYUN_PASSWORD && \
+          upx login $UPYUN_BUCKET $UPYUN_OPERATOR $UPYUN_PASSWORD
           upx sync ./ /gh/sysiocn/images

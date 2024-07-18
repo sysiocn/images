@@ -1,0 +1,35 @@
+name: Sync to UPYUN
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-22.04
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.18'
+
+      - name: Install UPX
+        run: go get -u github.com/upyun/upx/cmd/upx@master
+
+      - name: Sync files to UPYUN
+        env:
+          UPYUN_BUCKET: ${{ secrets.UPYUN_BUCKET }}
+          UPYUN_OPERATOR: ${{ secrets.UPYUN_OPERATOR }}
+          UPYUN_PASSWORD: ${{ secrets.UPYUN_PASSWORD }}
+        run: |
+          upx login $UPYUN_BUCKET $UPYUN_OPERATOR $UPYUN_PASSWORD && \
+          upx sync ./ /gh/sysiocn/images
